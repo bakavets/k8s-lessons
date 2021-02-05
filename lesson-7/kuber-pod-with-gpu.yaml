@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: app-kuber-with-gpu
+  labels: 
+     app: http-server
+spec:
+  nodeSelector:
+    gpu: "true"
+  containers:
+  - name: app-kuber-container
+    image: bokovets/kuber:0.1
+    ports:
+    - containerPort: 8000
