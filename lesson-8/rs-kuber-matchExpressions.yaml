@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: kuber-rs-2
+spec:
+  replicas: 3
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - kuber-1
+          - http-server
+      - key: env
+        operator: Exists
+  template:
+    metadata:
+      labels:
+        app: kuber-12
+        env: dev
+    spec:
+      containers:
+      - name: kuber-app
+        image: bokovets/kuber
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: kuber-rs-3
+spec:
+  replicas: 3
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - kuber-1
+          - http-server
+      - key: env
+        operator: Exists
+  template:
+    metadata:
+      labels:
+        app: kuber
+        env: dev
+    spec:
+      containers:
+      - name: kuber-app
+        image: bokovets/kuber

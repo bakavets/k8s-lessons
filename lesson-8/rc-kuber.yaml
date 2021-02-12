@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: kuber-rc
+spec:
+  replicas: 3
+  selector:
+    app: http-server
+  template:
+    metadata:
+      name: kuber-app
+      labels:
+        app: http-server
+    spec:
+      containers:
+      - name: http-server-image
+        image: bokovets/kuber
+        ports:
+        - containerPort: 8000

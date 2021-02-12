@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kuber-app-manual
+  labels:
+    app: kuber-test
+spec:
+  containers:
+  - name: kuber-app-image
+    image: bokovets/kuber
+    ports:
+    - containerPort: 8000
