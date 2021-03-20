@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kuber-app-manual
+  labels:
+    app: web-server
+spec:
+  containers:
+  - name: kuber-app-image
+    image: bokovets/kuber:v2.0
+    ports:
+    - name: http
+      containerPort: 8000
+    - name: https
+      containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kuber-app-manual-service
+spec:
+  selector:
+    app: web-server
+  ports:
+  - name: http
+    port: 80
+    targetPort: http
+  - name: https
+    port: 443
+    targetPort: https
