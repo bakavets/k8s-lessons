@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-http-allprobes
+  labels:
+    app: kuber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kuber-http-allprobes
+  template:
+    metadata:
+      labels:
+        app: kuber-http-allprobes
+    spec:
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber:v1.0
+        ports:
+        - containerPort: 8000
+        startupProbe:
+          exec:
+            command:
+            - cat
+            - /server-test.py
+          initialDelaySeconds: 10
+          failureThreshold: 30 # 30 * 10 = 300 + 10 = 310 sec
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - cat
+            - /server-test.py
+          failureThreshold: 1
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kuber-http-allprobes-service
+spec:
+  selector:
+    app: kuber-http-allprobes
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      nodePort: 30004
+  type: NodePort

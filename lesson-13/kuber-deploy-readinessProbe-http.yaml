@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-http-readinessprobe
+  labels:
+    app: kuber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-server-default
+  template:
+    metadata:
+      labels:
+        app: http-server-default
+    spec:
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber:v1.0-unhealthy
+        ports:
+        - containerPort: 8000
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
