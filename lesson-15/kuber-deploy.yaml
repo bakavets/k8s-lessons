@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-args
+  labels:
+    app: kuber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-server-args
+  template:
+    metadata:
+      labels:
+        app: http-server-args
+    spec:
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber:v1.0-args
+        args: 
+        - "3"
+        - "2"
+        - text-temp
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kuber-args-service
+spec:
+  selector:
+    app: http-server-args
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+      nodePort: 30001
+  type: NodePort
