@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kuber-daemonset
+  labels:
+    app: kuber-daemonset
+spec:
+  selector:
+    matchLabels:
+      app: kuber-daemon
+  template:
+    metadata:
+      labels:
+        app: kuber-daemon
+    spec:
+      nodeSelector:
+        topology.kubernetes.io/zone: "eu-west-1c"
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber
+        ports:
+        - containerPort: 8000
