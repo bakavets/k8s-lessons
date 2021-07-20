@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-with-restartpolicy-never
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      containers:
+      - name: job-with-failure
+        image: busybox
+        command: ["/bin/sh", "-c"]
+        args: ["echo 'Running Job'; sleep 5; exit 1"]
+      restartPolicy: Never
