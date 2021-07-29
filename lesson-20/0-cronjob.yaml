@@ -10,14 +10,14 @@ spec:
       activeDeadlineSeconds: 240
       parallelism: 2
       completions: 3
-      ttlSecondsAfterFinished: 30
       template:
         spec:
           containers:
           - name: hello
             image: busybox
-            args:
+            imagePullPolicy: IfNotPresent
+            command:
             - /bin/sh
             - -c
-            - date; echo "Hello World!"
+            - date; echo Hello from the Kubernetes cluster
           restartPolicy: OnFailure
