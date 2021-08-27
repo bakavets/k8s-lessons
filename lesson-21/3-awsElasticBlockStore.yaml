@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: http-server
+spec:
+  containers:
+  - image: bakavets/kuber
+    name: http-server
+    volumeMounts:
+    - mountPath: /cache
+      name: aws-volume
+  volumes:
+  - name: aws-volume
+    # This AWS EBS volume must already exist.
+    awsElasticBlockStore:
+      volumeID: "vol-0111111111111"
+      fsType: ext4
