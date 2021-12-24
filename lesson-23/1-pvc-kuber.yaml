@@ -1,0 +1,12 @@
+# https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: aws-pvc-kuber-1
+spec:
+  storageClassName: "custom-gp2"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi

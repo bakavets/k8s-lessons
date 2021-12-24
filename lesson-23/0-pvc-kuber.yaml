@@ -1,0 +1,12 @@
+# https://kubernetes.io/docs/reference/kubernetes-api/config-and-storage-resources/persistent-volume-claim-v1/
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: aws-pvc-kuber
+spec:
+  storageClassName: "" # Empty string must be explicitly set otherwise default StorageClass will be set
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
