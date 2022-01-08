@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: demo
+  namespace: demo-irsa
+  labels:
+    name: demo
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::849634744839:role/demo-eks-cluster-role
+
+

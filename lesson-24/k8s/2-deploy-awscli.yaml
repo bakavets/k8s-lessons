@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-cli-deployment
+  namespace: demo-irsa
+spec:
+  selector:
+    matchLabels:
+      app: aws-cli
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: aws-cli
+    spec:
+      serviceAccount: demo
+      containers:
+      - name: aws-cli
+        image: amazon/aws-cli
+        command: ["/bin/sh", "-c", "sleep 100000000"]
