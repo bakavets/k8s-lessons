@@ -1,0 +1,23 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # You must replace this email address with your own.
+    # Let's Encrypt will use this to contact you about expiring
+    # certificates, and issues related to your account.
+    email: bakavets.com@gmail.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Secret resource that will be used to store the ACME account's private key.
+      name: letsencrypt-prod-private-key
+    solvers:
+    # this solver handles kubxr.com challenges
+    - selector: 
+        dnsZones: 
+          - "kubxr.com"
+      dns01:
+        route53:
+          region: eu-north-1
+          hostedZoneID: Z04182373OABFAT240LL1

@@ -1,0 +1,52 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: general-ingress
+spec:
+  ingressClassName: nginx # replacement of annotation: kubernetes.io/ingress.class: nginx
+  tls:
+  - hosts:
+    - kubxr.com
+    - "*.kubxr.com"
+    secretName: tls-wildcard
+  rules:
+   - host: app-4.kubxr.com
+     http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: kuber-service-4
+                port: 
+                  number: 80
+   - host: app-5.kubxr.com
+     http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: kuber-service-5
+                port: 
+                  number: 80
+   - host: kubxr.com
+     http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: kuber-service
+                port: 
+                  number: 80
+   - host: "*.kubxr.com"
+     http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: kuber-service
+                port: 
+                  number: 80

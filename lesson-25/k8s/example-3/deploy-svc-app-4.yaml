@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-4
+  labels:
+    app: kuber-4
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: http-server-4
+  template:
+    metadata:
+      labels:
+        app: http-server-4
+    spec:
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber:v1.0
+        ports:
+        - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kuber-service-4
+spec:
+  selector:
+    app: http-server-4
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8000
+  type: ClusterIP
+

@@ -1,0 +1,7 @@
+installCRDs: true
+serviceAccount:
+  name: cert-manager-route53
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::849634744839:role/demo-eks-cluster-cert-manager-role
+extraArgs: 
+- --issuer-ambient-credentials
