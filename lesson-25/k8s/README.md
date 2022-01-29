@@ -1,4 +1,4 @@
-# Install NGINX Ingress Controller: https://kubernetes.github.io/ingress-nginx/deploy/#aws
+## Install NGINX Ingress Controller: https://kubernetes.github.io/ingress-nginx/deploy/#aws
 
 NGINX Ingress Controller ingressClassName: https://kubernetes.github.io/ingress-nginx/user-guide/basic-usage/
 
