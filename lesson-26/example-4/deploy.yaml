@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-2
+  labels:
+    app: kuber-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-server-2
+  template:
+    metadata:
+      labels:
+        app: http-server-2
+    spec:
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber:v1.0-args
+        args: ["$(INTERVAL)","$(COUNT)","$(TEXT_ARG)"]
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - # prefix: CONFIG_
+          configMapRef:
+            name: demo-cm

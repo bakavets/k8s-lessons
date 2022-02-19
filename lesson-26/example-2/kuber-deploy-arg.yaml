@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-args
+  labels:
+    app: kuber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-server-args
+  template:
+    metadata:
+      labels:
+        app: http-server-args
+    spec:
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber:v1.0-args
+        args: ["1","7","Hello World!"]
+        ports:
+        - containerPort: 8000

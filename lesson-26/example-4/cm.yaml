@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-cm
+data:
+  INTERVAL: "3"
+  COUNT: "6"
+  TEXT_ARG: |
+    Hello from World!
+    This is demo config!
+    As an example.
