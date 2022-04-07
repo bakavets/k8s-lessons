@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-2
+  labels:
+    app: kuber-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-server-2
+  template:
+    metadata:
+      labels:
+        app: http-server-2
+    spec:
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber:v2.0
+        ports:
+        - containerPort: 8000
+        env:
+          - name: SECRET_USERNAME
+            valueFrom:
+              secretKeyRef:
+                name: secret-stringdata
+                key: username
+          - name: SECRET_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: secret-stringdata
+                key: password

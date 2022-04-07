@@ -1,0 +1,12 @@
+# Ref: https://kubernetes.io/docs/concepts/configuration/secret/#tls-secrets
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-tls
+type: kubernetes.io/tls
+stringData:
+  # the data is abbreviated in this example
+  tls.crt: |
+        MIIC2DCCAcCgAwIBAgIBATANBgkqh
+  tls.key: |
+        MIIEpgIBAAKCAQEA7yn3bRHQ5FHMQ

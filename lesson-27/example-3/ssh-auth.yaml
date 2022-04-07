@@ -1,0 +1,10 @@
+# Ref: https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets
+apiVersion: v1
+kind: Secret
+metadata:
+  name: secret-ssh-auth
+type: kubernetes.io/ssh-auth
+stringData:
+  # the data is abbreviated in this example
+  ssh-privatekey: |
+          test

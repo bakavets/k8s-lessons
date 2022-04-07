@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-1
+  labels:
+    app: kuber-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-server-1
+  template:
+    metadata:
+      labels:
+        app: http-server-1
+    spec:
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber:v1.0
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: secrets
+          mountPath: "/etc/secrets"
+      volumes:
+      - name: secrets
+        secret:
+          secretName: secret-data
+          defaultMode: 0400

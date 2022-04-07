@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber-private
+  labels:
+    app: kuber-private
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-server-private
+  template:
+    metadata:
+      labels:
+        app: http-server-private
+    spec:
+      # imagePullSecrets:
+      # - name: secret-docker-registry
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber-private
+        ports:
+        - containerPort: 8000
+
