@@ -62,9 +62,11 @@ Chart Management:
 
 ```helm upgrade --install demo-app-test demo-chart-0.1.0.tgz --dry-run```
 
-kubectl get secrets/sh.helm.release.v1.demo-app.v2 --template={{.data.release}} | base64 -D | base64 -D | gzip -cd > release_decoded
+Helm Secrets:
 
-echo -n "" | base64 --decode > ingr.yaml
+```kubectl get secrets/sh.helm.release.v1.demo-app.v2 --template={{.data.release}} | base64 -D | base64 -D | gzip -cd > release_decoded```
+
+```echo -n "" | base64 --decode > ingr.yaml```
 
 Uninstall Apps:
 
