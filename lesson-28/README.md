@@ -1,3 +1,7 @@
+<a href="https://youtu.be/A_0zbCZbSbE" target="_blank">
+ <img src="https://img.youtube.com/vi/A_0zbCZbSbE/0.jpg" alt="Watch the video" width="860" height="620" border="10" />
+</a>
+
 Installing Helm: https://helm.sh/docs/intro/install/
 
 Helm create:
