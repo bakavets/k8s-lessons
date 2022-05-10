@@ -1,0 +1,16 @@
+env:
+  open:
+    STORAGE: amazon
+    STORAGE_AMAZON_BUCKET: demo-helm-chartmuseum
+    STORAGE_AMAZON_PREFIX:
+    STORAGE_AMAZON_REGION: eu-north-1
+    AWS_SDK_LOAD_CONFIG: true
+    DISABLE_API: false
+  secret:
+    BASIC_AUTH_USER: admin
+    BASIC_AUTH_PASS: mypassword
+serviceAccount:
+  create: true
+  name: chartmuseum
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/demo-eks-cluster-chartmuseum-role
