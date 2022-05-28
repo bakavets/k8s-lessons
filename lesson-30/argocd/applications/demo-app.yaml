@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: demo-app
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/bakavets/k8s-lessons.git
+    targetRevision: main
+    path: lesson-30/charts/demo
+
+    helm:
+      # Extra parameters to set (same as setting through values.yaml, but these take precedence)
+      parameters:
+      - name: "service.port"
+        value: "8082"
+      # - name: "replicaCount"
+      #   value: "4"
+
+      # Helm values files for overriding values in the helm chart
+      # The path is relative to the spec.source.path directory defined above
+      valueFiles:
+      - values-dev.yaml
+
+      # Values file as block file
+      values: |
+        # replicaCount: 2
+        serviceAccount:
+          create: true
+          annotations:
+            demo/role: demo-annotation
+          name: sa-custom-name
+
+  # Destination cluster and namespace to deploy the application
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: demo
+
+  # Sync policy
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
