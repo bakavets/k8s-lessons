@@ -10,7 +10,7 @@ spec:
 
   source:
     repoURL: https://github.com/bakavets/k8s-lessons.git
-    targetRevision: main
+    targetRevision: master
     path: lesson-30/charts/demo
 
     helm:

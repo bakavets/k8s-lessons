@@ -14,7 +14,7 @@ spec:
   # Source of the application manifests
   source:
     repoURL: https://github.com/bakavets/k8s-lessons.git  # Can point to either a Helm chart repo or a git repo.
-    targetRevision: main  # For Helm, this refers to the chart version.
+    targetRevision: master  # For Helm, this refers to the chart version.
     path: lesson-30/dev/kuber  # This has no meaning for Helm charts pulled directly from a Helm repo instead of git.
 
   # Destination cluster and namespace to deploy the application
