@@ -16,6 +16,8 @@ spec:
       parameters:
       - name: "controller.replicaCount"
         value: "2"
+      - name: "controller.service.type"
+        value: "NodePort"
 
   destination:
     namespace: ingress-nginx
