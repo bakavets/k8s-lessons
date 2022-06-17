@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: counter-3
+  labels:
+    app: counter-3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: counter-3
+  template:
+    metadata:
+      labels:
+        app: counter-3
+      annotations:
+        fluentd.active: 'false'
+    spec:
+      containers:
+      - name: count
+        image: busybox
+        args: [/bin/sh, -c, 'i=0; while true; do echo "$i: $(date)"; i=$((i+1)); sleep 1; done']
