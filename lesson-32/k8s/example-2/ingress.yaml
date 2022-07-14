@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: main-ingress
+  namespace: example-2
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: instance # service must be of type "NodePort" or "LoadBalancer" to use instance mode
+    alb.ingress.kubernetes.io/tags: Environment=Development,Team=DevOps,Project=app
+spec:
+  ingressClassName: alb
+  rules:
+   - host: app-1.kubxr.com
+     http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: kuber-service-1
+                port: 
+                  number: 80
+   - host: app-2.kubxr.com
+     http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: kuber-service-2
+                port: 
+                  number: 80
