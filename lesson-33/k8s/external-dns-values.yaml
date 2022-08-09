@@ -1,0 +1,14 @@
+domainFilters: ["kubxr.com"] # will make ExternalDNS see only the hosted zones matching provided domain, omit to process all available hosted zones
+registry: txt # Registry method to use. TXT records signify that the corresponding ALIAS records are managed by ExternalDNS.
+txtOwnerId: my-demo-identifier # set to a unique value that doesn't change for the lifetime of your cluster. A name that identifies this instance of ExternalDNS.
+provider: aws # DNS provider where the DNS records will be created.
+policy: upsert-only # would prevent ExternalDNS from deleting any records. (options: sync, upsert-only )
+sources: ["service", "ingress"] # K8s resources type to be observed for new DNS entries by ExternalDNS
+serviceAccount:
+  create: true
+  name: external-dns
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::849634744839:role/demo-eks-cluster-external-dns-role
+aws:
+  region: eu-north-1
+  zoneType: public # only look at public hosted zones
