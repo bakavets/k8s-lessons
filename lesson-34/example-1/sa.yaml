@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: app-sa
+  namespace: example-1
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: example-1
+  name: role-app
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["list", "patch"]
+  - apiGroups: [""] # "" indicates the core API group
+    resources: ["services"]
+    verbs: ["get", "list"]
+  # https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list"]
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    resourceNames: ["nginx-deployment"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: example-1-rb
+  namespace: example-1
+subjects:
+  - kind: ServiceAccount
+    name: app-sa
+    namespace: example-1
+  - kind: ServiceAccount
+    name: default
+    namespace: default
+roleRef:
+  kind: Role
+  name: role-app
+  apiGroup: rbac.authorization.k8s.io
