@@ -1,8 +1,12 @@
+```
 minikube start --kubernetes-version=v1.20.0 --profile k8s-v1.20.0
-
+```
+```
 minikube start --kubernetes-version=v1.23.9 --profile k8s-v1.23.9
-
+```
+```
 minikube start --kubernetes-version=v1.24.3 --profile k8s-v1.24.3
+```
 
 https://jwt.io
 
