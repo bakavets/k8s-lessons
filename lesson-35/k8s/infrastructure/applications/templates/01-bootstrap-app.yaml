@@ -1,0 +1,76 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bootstrap-app
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: {{ .Values.source.repoURL }}
+    targetRevision: main
+    path: k8s/infrastructure/charts/bootstrap-app
+    helm:
+      values: |
+        clusterName: {{ .Values.clusterName }}
+
+        aws:
+          region: {{ .Values.aws.region }}
+        
+        certManager:
+          enabled: true
+          version: v1.9.1
+          serviceAccountName: {{ .Values.bootstrapApp.certManager.serviceAccountName }}
+          serviceAccountNamespace: {{ .Values.bootstrapApp.certManager.serviceAccountNamespace }}
+          eksRoleArn: {{ .Values.bootstrapApp.certManager.eksRoleArn }}
+
+        certManagerConfigs:
+          enabled: true
+          repoURL: {{ .Values.source.repoURL }}
+          version: {{ .Values.source.targetRevision }}
+          path: k8s/infrastructure/charts/cert-manager-configs
+          acme:
+            email: {{ .Values.bootstrapApp.certManagerConfigs.acme.email }}
+            dnsZones:
+              - {{ .Values.aws.route53.dnsZone }}
+            route53:
+              hostedZoneID: {{ .Values.aws.route53.hostedZoneID }}
+
+        awsLBController:
+          enabled: true
+          version: 1.4.4
+          serviceAccountName: {{ .Values.bootstrapApp.awsLBController.serviceAccountName }}
+          namespace: {{ .Values.bootstrapApp.awsLBController.namespace }}
+          eksRoleArn: {{ .Values.bootstrapApp.awsLBController.eksRoleArn }}
+
+        externalDNS:
+          enabled: true
+          version: 6.8.1
+          serviceAccountName: {{ .Values.bootstrapApp.externalDNS.serviceAccountName }}
+          namespace: {{ .Values.bootstrapApp.externalDNS.namespace }}
+          eksRoleArn: {{ .Values.bootstrapApp.externalDNS.eksRoleArn }}
+          domainFilters:
+            - {{ .Values.aws.route53.dnsZone }}
+          txtOwnerId: {{ .Values.aws.route53.hostedZoneID }}
+          policy: upsert-only
+          sources:
+            - service
+            - ingress
+          zoneType: public
+
+        ingressNginx:
+          enabled: true
+          version: 4.2.3
+          namespace: ingress-nginx
+
+  destination:
+    # The namespace will only be set for namespace-scoped resources that have not set a value for .metadata.namespace
+    namespace: argocd
+    server: https://kubernetes.default.svc
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: -1  # unlimited

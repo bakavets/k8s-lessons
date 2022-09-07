@@ -1,0 +1,54 @@
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+
+clusterName: eks-cluster-name
+
+aws:
+  region: us-east-1
+
+certManager:
+  enabled: false
+  version: v1.9.0
+  serviceAccountName: cert-manager
+  namespace: cert-manager
+  eksRoleArn: arn:aws:iam::123456789123:role/role-name
+
+certManagerConfigs:
+  enabled: false
+  repoURL: git@gitlab.com:example/example.git
+  version: main
+  path: k8s/infrastructure/charts/cert-manager-configs
+  acme:
+    email: example@example.com
+    dnsZones:
+      - example.com
+    route53:
+      hostedZoneID: Z123456789EXAMPLE
+
+awsLBController:
+  enabled: false
+  version: 1.4.3
+  serviceAccountName: alb
+  namespace: kube-system
+  eksRoleArn: arn:aws:iam::123456789123:role/role-name
+
+externalDNS:
+  enabled: false
+  version: 6.8.0
+  serviceAccountName: external-dns
+  namespace: kube-system
+  eksRoleArn: arn:aws:iam::123456789123:role/role-name
+  domainFilters:
+    - example.com
+  txtOwnerId: my-demo-identifier
+  policy: upsert-only
+  sources:
+    - service
+    - ingress
+  zoneType: public
+
+ingressNginx:
+  enabled: false
+  version: 4.2.2
+  namespace: kube-system

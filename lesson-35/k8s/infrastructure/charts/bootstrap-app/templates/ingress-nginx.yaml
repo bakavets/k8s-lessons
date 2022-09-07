@@ -1,0 +1,35 @@
+{{ if .Values.ingressNginx.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: ingress-nginx
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://kubernetes.github.io/ingress-nginx
+    targetRevision: {{ .Values.ingressNginx.version }}
+    chart: ingress-nginx
+    helm:
+      values: |
+        controller:
+          service:
+            annotations:
+              service.beta.kubernetes.io/aws-load-balancer-type: external
+              service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+              service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+ 
+  destination:
+    namespace: {{ .Values.ingressNginx.namespace }}
+    server: {{ .Values.spec.destination.server }}
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+{{ end }}

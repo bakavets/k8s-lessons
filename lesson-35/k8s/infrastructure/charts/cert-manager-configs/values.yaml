@@ -1,0 +1,7 @@
+acme:
+  email: example@example.com
+  dnsZones:
+    - example.com
+  route53:
+    region: us-east-1
+    hostedZoneID: Z123456789EXAMPLE

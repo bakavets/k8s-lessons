@@ -1,0 +1,35 @@
+{{ if .Values.certManagerConfigs.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager-configs
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: {{ .Values.certManagerConfigs.repoURL }}
+    targetRevision: {{ .Values.certManagerConfigs.version }}
+    path: {{ .Values.certManagerConfigs.path }}
+    helm:
+      values: |
+        acme:
+          email: {{ .Values.certManagerConfigs.acme.email }}
+          dnsZones:
+            {{- range .Values.certManagerConfigs.acme.dnsZones }}
+            - {{ . }}
+            {{- end }}
+          route53:
+            region: {{ .Values.aws.region }}
+            hostedZoneID: {{ .Values.certManagerConfigs.acme.route53.hostedZoneID }}
+
+  destination:
+    server: {{ .Values.spec.destination.server }}
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+{{ end }}

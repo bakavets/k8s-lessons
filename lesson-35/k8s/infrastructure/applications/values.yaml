@@ -1,0 +1,31 @@
+aws:
+  region: us-east-1
+  route53:
+    dnsZone: example.com
+    hostedZoneID: Z123456789EXAMPLE
+
+clusterName: eks-cluster
+
+source:
+  repoURL: git@gitlab.com:example/example.git
+  targetRevision: main
+
+bootstrapApp:
+  certManager:
+    serviceAccountName: cert-manager-route53
+    serviceAccountNamespace: cert-manager
+    eksRoleArn: arn:aws:iam::123456789123:role/role-name
+
+  certManagerConfigs:
+    acme:
+      email: example.com@gmail.com
+
+  awsLBController:
+    serviceAccountName: aws-load-balancer-controller
+    namespace: kube-system
+    eksRoleArn: arn:aws:iam::123456789123:role/role-name
+
+  externalDNS:
+    serviceAccountName: external-dns
+    namespace: external-dns
+    eksRoleArn: arn:aws:iam::123456789123:role/role-name
