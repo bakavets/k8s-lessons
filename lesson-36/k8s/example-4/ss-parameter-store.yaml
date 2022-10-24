@@ -1,0 +1,14 @@
+apiVersion: external-secrets.io/v1beta1
+kind: SecretStore
+metadata:
+  name: aws-ps-ns
+  namespace: example
+spec:
+  provider:
+    aws:
+      service: ParameterStore
+      region: eu-west-1
+      auth:
+        jwt:
+          serviceAccountRef:
+            name: es-sa

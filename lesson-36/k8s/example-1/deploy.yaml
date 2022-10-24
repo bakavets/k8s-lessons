@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber
+  labels:
+    app: kuber
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: http-server
+  template:
+    metadata:
+      labels:
+        app: http-server
+    spec:
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber
+        ports:
+        - containerPort: 8000
+        env:
+          - name: API_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: k8s-secret-api-token
+                key: token

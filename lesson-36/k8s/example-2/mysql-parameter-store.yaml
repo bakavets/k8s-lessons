@@ -1,0 +1,38 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: mysql-parameter-store
+  namespace: default
+spec:
+  refreshInterval: 1h
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: aws-parameter-store
+  target:
+    name: mysql-parameter-store
+    creationPolicy: Owner
+  data:
+  - secretKey: MYSQL_HOST
+    remoteRef:
+      key: demo-mysql
+      property: MYSQL_HOST
+  - secretKey: MYSQL_PORT
+    remoteRef:
+      key: demo-mysql
+      property: MYSQL_PORT
+  - secretKey: MYSQL_DB
+    remoteRef:
+      key: demo-mysql
+      property: MYSQL_DATABASE
+  - secretKey: MYSQL_USER
+    remoteRef:
+      key: demo-mysql
+      property: MYSQL_USER
+  - secretKey: MYSQL_PASSWORD
+    remoteRef:
+      key: demo-mysql
+      property: MYSQL_PASSWORD
+  - secretKey: DEMO
+    remoteRef:
+      key: demo-mysql
+      property: name.last
