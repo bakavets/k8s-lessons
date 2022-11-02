@@ -1,0 +1,92 @@
+loki:
+  replicas: 2
+
+  resources:
+    limits:
+      cpu: 1500m
+      memory: 2048Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - labelSelector:
+          matchExpressions:
+          - key: app
+            operator: In
+            values:
+            - loki
+        topologyKey: topology.kubernetes.io/zone
+
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    storageClassName: gp2
+  
+  serviceAccount:
+    create: true
+    name: ${sa_name}
+    annotations:
+      eks.amazonaws.com/role-arn: ${role_arn}
+
+  # https://grafana.com/docs/loki/latest/configuration/#configuring-grafana-loki
+  config:
+    # https://grafana.com/docs/loki/latest/operations/storage/wal/
+    auth_enabled: false
+    limits_config:
+      retention_period: 744h
+      max_query_length: 800h
+    compactor:
+      shared_store: s3
+      compaction_interval: 10m
+      retention_enabled: true
+      retention_delete_delay: 2h
+      retention_delete_worker_count: 150
+      working_directory: /data/loki/boltdb-shipper-compactor
+    # https://github.com/grafana/loki/blob/main/docs/sources/storage/_index.md#schema-configs
+    # https://grafana.com/docs/loki/latest/operations/storage/schema/
+    schema_config:
+      configs:
+        - from: 2022-10-29
+          # https://grafana.com/docs/loki/latest/operations/storage/boltdb-shipper/
+          store: boltdb-shipper
+          object_store: s3
+          schema: v11
+          index:
+            prefix: loki_index_
+            period: 24h
+    storage_config:
+      aws:
+        s3: s3://${region}/${bucket_name}
+        s3forcepathstyle: true
+        bucketnames: ${bucket_name}
+        region: ${region}
+        insecure: false
+        sse_encryption: false
+      boltdb_shipper:
+        active_index_directory: /data/loki/boltdb-shipper-active
+        cache_location: /data/loki/boltdb-shipper-cache
+        cache_ttl: 24h
+        shared_store: s3
+
+promtail:
+  enabled: true
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+grafana:
+  enabled: true
+  sidecar:
+    datasources:
+      enabled: true
+  image:
+    tag: 9.2.2
