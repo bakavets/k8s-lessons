@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: with-pod-affinity
+  labels:
+    app: kuber
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: http-server
+  template:
+    metadata:
+      labels:
+        app: http-server
+    spec:
+      containers:
+        - name: kuber-app
+          image: bakavets/kuber
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: 1500m
+              memory: 2Gi
+            requests:
+              cpu: 1500m
+              memory: 512Mi
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - http-server
+            topologyKey: kubernetes.io/hostname
+          # preferredDuringSchedulingIgnoredDuringExecution:
+          # - weight: 100
+          #   podAffinityTerm:
+          #     labelSelector:
+          #       matchExpressions:
+          #       - key: app
+          #         operator: In
+          #         values:
+          #         - http-server
+          #     topologyKey: kubernetes.io/hostname
