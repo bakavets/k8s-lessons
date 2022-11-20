@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: with-no-schedule-taint
+  labels:
+    app: kuber
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: http-server
+  template:
+    metadata:
+      labels:
+        app: http-server
+    spec:
+      containers:
+        - name: kuber-app
+          image: bakavets/kuber
+          ports:
+            - containerPort: 8000
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.k8s/role
+                    operator: In
+                    values:
+                      - app-worker
+      tolerations:
+        - key: node.k8s/app-role
+          operator: Equal # Exists
+          value: worker
+          effect: NoSchedule
