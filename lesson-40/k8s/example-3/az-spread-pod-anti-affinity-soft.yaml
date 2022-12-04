@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: az-spread-pod-anti-affinity-soft
+  labels:
+    app: kuber
+spec:
+  replicas: 21
+  selector:
+    matchLabels:
+      app: http-server
+  template:
+    metadata:
+      labels:
+        app: http-server
+        version: v1
+    spec:
+      containers:
+        - name: kuber-app
+          image: bakavets/kuber
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: 400m
+              memory: 256Mi
+            requests:
+              cpu: 400m
+              memory: 256Mi
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node.k8s/role
+                    operator: In
+                    values:
+                      - management
+                      - app-worker
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - http-server
+              topologyKey: topology.kubernetes.io/zone

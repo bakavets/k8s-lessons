@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: az-spread-topology
+  labels:
+    app: kuber
+spec:
+  replicas: 21
+  selector:
+    matchLabels:
+      app: http-server
+  template:
+    metadata:
+      labels:
+        app: http-server
+        version: v1
+    spec:
+      containers:
+        - name: kuber-app
+          image: bakavets/kuber
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: 400m
+              memory: 256Mi
+            requests:
+              cpu: 400m
+              memory: 256Mi
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: http-server

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: az-spread
+  labels:
+    app: kuber
+spec:
+  replicas: 45
+  selector:
+    matchLabels:
+      app: http-server
+  template:
+    metadata:
+      labels:
+        app: http-server
+    spec:
+      containers:
+        - name: kuber-app
+          image: bakavets/kuber
+          ports:
+            - containerPort: 8000
