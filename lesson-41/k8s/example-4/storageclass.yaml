@@ -1,0 +1,12 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-gp3-with-custom-kms
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+parameters:
+  csi.storage.k8s.io/fstype: ext4
+  type: gp3
+  encrypted: "true"
+  kmsKeyId: "arn:aws:kms:eu-west-1:849634744839:key/dcf49252-39b4-4469-bff0-ca3e1e8643de"

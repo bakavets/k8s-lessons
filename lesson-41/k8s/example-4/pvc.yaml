@@ -1,0 +1,11 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: aws-pvc-kuber
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ebs-gp3-with-custom-kms
+  resources:
+    requests:
+      storage: 7Gi
