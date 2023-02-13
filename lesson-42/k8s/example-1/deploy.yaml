@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kuber
+  labels:
+    app: kuber
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: http-server
+  template:
+    metadata:
+      labels:
+        app: http-server
+    spec:
+      # securityContext:
+      #   runAsUser: 1100
+      #   runAsGroup: 3000
+      #   fsGroup: 2000
+      containers:
+      - name: kuber-app
+        image: bakavets/kuber
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - mountPath: /data
+          name: data-volume
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: efs-claim

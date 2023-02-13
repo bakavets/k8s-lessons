@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: efs-app-ap
+  labels:
+    app: efs-app-ap
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: efs-app-ap
+  template:
+    metadata:
+      labels:
+        app: efs-app-ap
+    spec:
+      # securityContext:
+      #   runAsUser: 10
+      #   runAsGroup: 30
+      #   fsGroup: 20
+      containers:
+        - name: app
+          image: centos
+          command: ["/bin/sh"]
+          args:
+            [
+              "-c",
+              "while true; do echo $(date -u) - $HOSTNAME >> /data/out.txt; sleep 3; done",
+            ]
+          volumeMounts:
+            - name: efs-volume
+              mountPath: /data
+      volumes:
+        - name: efs-volume
+          persistentVolumeClaim:
+            claimName: efs-claim-ap

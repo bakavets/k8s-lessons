@@ -1,0 +1,99 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-sc
+provisioner: efs.csi.aws.com
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-pv1
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-091a417a0a5e4fd14:/dir1
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-claim1
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: efs-pv2
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: efs-sc
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: fs-091a417a0a5e4fd14:/dir2
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-claim2
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: efs-app
+  labels:
+    app: efs-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: efs-app
+  template:
+    metadata:
+      labels:
+        app: efs-app
+    spec:
+      containers:
+        - name: app
+          image: centos
+          command: ["/bin/sh"]
+          args:
+            [
+              "-c",
+              "while true; do echo $(date -u) - $HOSTNAME >> /data-dir1/out.txt; echo Hello from: $HOSTNAME - $(date -u) >> /data-dir2/hello.txt; sleep 5; done",
+            ]
+          volumeMounts:
+            - name: efs-volume-1
+              mountPath: /data-dir1
+            - name: efs-volume-2
+              mountPath: /data-dir2
+      volumes:
+        - name: efs-volume-1
+          persistentVolumeClaim:
+            claimName: efs-claim1
+        - name: efs-volume-2
+          persistentVolumeClaim:
+            claimName: efs-claim2
