@@ -1,0 +1,23 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress
+  namespace: example-2
+spec:
+  podSelector:
+    matchLabels:
+      app: http-server-2
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: example-1
+          podSelector:
+            matchLabels:
+              app: http-server
+      ports:
+        - port: 8000
+          protocol: TCP

@@ -1,0 +1,20 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+  namespace: example-3
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+      - name: aws-cli
+        image: amazon/aws-cli
+        command: ["/bin/sh", "-c", "sleep 100000000"]

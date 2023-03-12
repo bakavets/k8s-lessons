@@ -1,0 +1,10 @@
+installation:
+  enabled: true
+  kubernetesProvider: EKS
+  flexVolumePath: None
+  kubeletVolumePluginPath: None
+  cni:
+    type: AmazonVPC
+
+apiServer:
+  enabled: true
