@@ -24,7 +24,7 @@ spec:
             path: /
             httpHeaders:
             - name: Host
-              value: kuber-healthy.example.com
+              value: kuber-unhealthy.example.com
             port: 80
           # initialDelaySeconds: 5
           periodSeconds: 5
