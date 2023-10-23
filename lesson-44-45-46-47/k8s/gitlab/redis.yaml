@@ -1,0 +1,89 @@
+# https://redis.io/docs/management/sentinel/
+# https://github.com/bitnami/charts/tree/main/bitnami/redis#choose-between-redis-helm-chart-and-redis-cluster-helm-chart
+# https://artifacthub.io/packages/helm/bitnami/redis
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '-8'
+  name: gitlab-redis
+  namespace: argocd
+spec:
+  project: infrastructure
+  source:
+    repoURL: 'https://charts.bitnami.com/bitnami'
+    targetRevision: 18.1.2
+    chart: redis
+    helm:
+      values: |
+        architecture: replication
+
+        auth:
+          enabled: true
+          # https://gitlab.com/gitlab-com/gl-infra/redis-chart-sandbox/-/merge_requests/4/diffs
+          # https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/1448#note_757458821
+          # https://gitlab.com/gitlab-org/charts/gitlab/-/issues/2902
+          sentinel: false
+          existingSecret: gitlab-redis
+          existingSecretPasswordKey: PASSWORD
+
+        # https://redis.io/docs/management/config-file/
+        commonConfiguration: |-
+          appendonly yes
+          dbfilename gitlab_dump.rdb
+          save 3600 1 300 100 60 10000
+          maxmemory 1gb
+          maxmemory-policy noeviction
+
+        replica:
+          replicaCount: 3
+          podAntiAffinityPreset: soft
+
+          resources:
+            limits:
+              cpu: 1
+              memory: 1024Mi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+
+          persistence:
+            enabled: true
+            storageClass: gp3-encrypted
+            size: 10Gi
+
+          autoscaling:
+            enabled: false
+
+        sentinel:
+          enabled: true
+          # https://docs.gitlab.com/ee/administration/redis/troubleshooting.html#troubleshooting-a-non-bundled-redis-with-a-self-compiled-installation
+          masterSet: gitlab-redis
+          quorum: 2
+
+          resources:
+            limits:
+              cpu: 1
+              memory: 256Mi
+            requests:
+              cpu: 500m
+              memory: 128Mi
+
+        metrics:
+          enabled: false
+
+        pdb:
+          create: true
+          minAvailable: null
+          maxUnavailable: 1
+  
+  destination:
+    namespace: gitlab
+    server: 'https://kubernetes.default.svc'
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: -1

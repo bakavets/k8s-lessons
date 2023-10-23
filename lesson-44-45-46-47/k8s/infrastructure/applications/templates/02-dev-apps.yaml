@@ -1,0 +1,38 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-apps
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: development
+  source:
+    repoURL: {{ .Values.source.repoURL }}
+    targetRevision: {{ .Values.source.targetRevision }}
+    path: k8s/development
+    helm:
+      values: |
+        source:
+          repoURL: {{ .Values.source.repoURL }}
+          targetRevision: {{ .Values.source.targetRevision }}
+          path: k8s/charts/app
+
+        appHosts:
+          app1: app-1.{{ .Values.aws.route53.dnsZone }}
+          app2: app-2.{{ .Values.aws.route53.dnsZone }}
+
+        clusterIssuer:
+          name: letsencrypt-prod
+
+        namespace: demo-app
+
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: -1  # unlimited

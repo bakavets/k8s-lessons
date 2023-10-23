@@ -1,0 +1,12 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: gp3-encrypted
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+reclaimPolicy: Retain
+parameters:
+  csi.storage.k8s.io/fstype: ext4
+  type: gp3
+  encrypted: "true"

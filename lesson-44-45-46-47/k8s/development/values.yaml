@@ -1,0 +1,17 @@
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+
+source:
+  repoURL: git@gitlab.com:example/example.git
+  targetRevision: main
+  path: k8s/charts/test-app/
+
+appHosts:
+  app1: app-1.example.com
+  app2: app-2.example.com
+
+clusterIssuer:
+  name: letsencrypt-prod
+
+namespace: demo-app

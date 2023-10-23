@@ -1,0 +1,34 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: main-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: {{ .Values.clusterIssuer.name }}
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - {{ .Values.hosts.app1 }}
+    - {{ .Values.hosts.app2 }}
+    secretName: app-tls
+  rules:
+   - host: {{ .Values.hosts.app1 }}
+     http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: kuber-service-1
+                port: 
+                  number: 80
+   - host: {{ .Values.hosts.app2 }}
+     http:
+        paths:
+          - pathType: Prefix
+            path: /
+            backend:
+              service:
+                name: kuber-service-2
+                port: 
+                  number: 80

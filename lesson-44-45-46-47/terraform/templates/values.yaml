@@ -1,0 +1,23 @@
+configs:
+  repositories:
+    k8s-repo:
+      name: k8s-repo
+      url: git@gitlab.com:${k8s_repo}.git
+      type: git
+      sshPrivateKey: |
+        ${indent(8, k8s_ssh_private_key)}
+
+server:
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingressClassName: nginx
+    hosts:
+     - argocd.${host}
+    tls:
+    - hosts:
+      - argocd.${host}
+      secretName: argocd-tls
+  extraArgs:
+    - --insecure # https://github.com/argoproj/argo-cd/issues/2953#issuecomment-602898868

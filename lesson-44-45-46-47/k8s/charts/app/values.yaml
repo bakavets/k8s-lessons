@@ -1,0 +1,6 @@
+hosts:
+  app1: app-1.example.com
+  app2: app-2.example.com
+
+clusterIssuer:
+  name: cluster-issuer-name

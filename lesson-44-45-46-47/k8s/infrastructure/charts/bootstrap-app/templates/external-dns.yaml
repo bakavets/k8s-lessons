@@ -1,0 +1,49 @@
+{{ if .Values.externalDNS.enabled }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: external-dns
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: infrastructure
+  source:
+    repoURL: https://charts.bitnami.com/bitnami
+    targetRevision: {{ .Values.externalDNS.version }}
+    chart: external-dns
+    helm:
+      values: |
+        domainFilters:
+          {{- range .Values.externalDNS.domainFilters }}
+          - {{ . }}
+          {{- end }} 
+        registry: txt 
+        txtOwnerId: {{ .Values.externalDNS.txtOwnerId }}
+        provider: aws
+        policy: {{ .Values.externalDNS.policy }}
+        sources: 
+          {{- range .Values.externalDNS.sources }}
+          - {{ . }}
+          {{- end }}
+        serviceAccount:
+          create: true
+          name: {{ .Values.externalDNS.serviceAccountName }}
+          annotations:
+            eks.amazonaws.com/role-arn: {{ .Values.externalDNS.eksRoleArn }}
+        aws:
+          region: {{ .Values.aws.region }}
+          zoneType: {{ .Values.externalDNS.zoneType }}
+
+  destination:
+    namespace: {{ .Values.externalDNS.namespace }}
+    server: {{ .Values.spec.destination.server }}
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true
+{{ end }}

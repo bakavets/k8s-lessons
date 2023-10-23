@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.serviceAccountRef.name }}
+  namespace: {{ .Values.serviceAccountRef.namespace }}
+  annotations:
+    eks.amazonaws.com/role-arn: {{ .Values.serviceAccountRef.eksRoleArn }}

@@ -1,0 +1,7 @@
+serviceAccountRef:
+  name: external-secrets
+  namespace: external-secrets
+  eksRoleArn: arn:aws:iam::123456789123:role/role-name
+
+aws:
+  region: eu-west-1
