@@ -1,0 +1,347 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "-7"
+  name: gitlab
+  namespace: argocd
+spec:
+  project: infrastructure
+  source:
+    repoURL: "https://charts.gitlab.io/"
+    targetRevision: 7.4.1
+    chart: gitlab
+    helm:
+      values: |
+        certmanager:
+          install: false
+
+        postgresql:
+          install: false
+
+        redis:
+          install: false
+
+        prometheus:
+          install: false
+
+        nginx-ingress:
+          enabled: true
+          controller:
+            scope:
+              enabled: false
+            service:
+              annotations:
+                service.beta.kubernetes.io/aws-load-balancer-type: external
+                service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+                service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+
+        registry:
+          enabled: false
+
+        gitlab-runner:
+          install: false
+
+        # https://gitlab.com/gitlab-org/charts/gitlab/-/issues/2979#note_732297487
+        upgradeCheck:
+          # for a fresh install disable it one time after a successful installation enable it again. 
+          enabled: false
+
+        global:
+          edition: ce # GitLab Community Edition
+
+          ingress:
+            configureCertmanager: false
+            enabled: true
+            class: nginx
+            # https://gitlab.com/gitlab-org/charts/gitlab/-/issues/4907#note_1494311672
+            tls:
+              enabled: true
+
+          hpa:
+            apiVersion: "autoscaling/v2"
+
+          pdb:
+            apiVersion: "policy/v1"
+
+          initialRootPassword:
+            secret: gitlab-initial-root-password
+            key: password
+
+          railsSecrets:
+            secret: gitlab-rails-secret
+
+          shell:
+            hostKeys:
+              secret: gitlab-shell-host-keys
+
+          oauth:
+            gitlab-pages:
+              secret: oauth-gitlab-pages-secret
+
+          psql:
+            host: demo-gitlab.cjzgdz8ihb4a.eu-west-1.rds.amazonaws.com
+            port: 5432
+            database: gitlabhq_production
+            username: gitlab
+            password:
+              useSecret: true
+              secret: gitlab-postgresql
+              key: POSTGRES_PASSWORD
+
+          redis:
+            
+            # https://docs.gitlab.com/ee/administration/redis/troubleshooting.html#troubleshooting-a-non-bundled-redis-with-a-self-compiled-installation
+            # TL;DR: masterSet name in redis helm chart = k8s service gitlab-redis name = host below
+            # Since we use sentinel we must set the host the same as masterSet 
+            # in the Redis helm chart. It means that masterSet must be in our 
+            # case gitlab-redis and gitlab-redis service name for redis has to 
+            # exist too because other GitLab services (like gitlab-exporter etc.) use gitlab-redis host to 
+            # reach redis via K8s service. 
+            
+            host: gitlab-redis
+            sentinels:
+              - host: gitlab-redis.gitlab.svc.cluster.local
+                port: 26379
+            auth:
+              enabled: true
+              secret: gitlab-redis
+              key: PASSWORD
+
+          hosts:
+            domain: kubxr.com
+            gitlab: 
+              name: git.kubxr.com
+            kas:
+              name: kas-gitlab.kubxr.com
+            pages: 
+              name: gitlab-pg.kubxr.com
+
+          minio:
+            enabled: false
+          # https://docs.gitlab.com/charts/charts/globals.html#specify-buckets
+          appConfig:
+            lfs:
+              bucket: demo-gitlab-lfs-storage
+              connection: # https://gitlab.com/gitlab-org/charts/gitlab/blob/master/doc/charts/globals.md#connection
+                secret: gitlab-rails-s3-storage
+                key: connection
+            artifacts:
+              bucket: demo-gitlab-artifacts-storage
+              connection:
+                secret: gitlab-rails-s3-storage
+                key: connection
+            uploads:
+              bucket: demo-gitlab-uploads-storage
+              connection:
+                secret: gitlab-rails-s3-storage
+                key: connection
+            packages:
+              bucket: demo-gitlab-packages-storage
+              connection: 
+                secret: gitlab-rails-s3-storage
+                key: connection
+
+            # https://docs.gitlab.com/charts/advanced/external-object-storage/#backups
+            backups:
+              bucket: demo-gitlab-backups-storage # bucket for storing the backups.
+              tmpBucket: demo-gitlab-tmp-storage # temporary bucket that is used when restoring a backup.
+
+          pages:
+            enabled: true
+            accessControl: true
+            https: true
+            artifactsServer: true
+            localStore:
+              enabled: false
+            objectStore:
+              enabled: true
+              bucket: demo-gitlab-pages-storage
+              connection:
+                secret: gitlab-rails-s3-storage
+                key: connection
+
+          # Test:
+          # 'gitlab-rails console' in toolbox pod
+          # Notify.test_email('bakavets.com@gmail.com', 'Message Subject Test', 'Message Body Test').deliver_now
+          email:
+            display_name: 'GitLab'
+            from: 'bakavets.com@gmail.com'
+            reply_to: 'bakavets.com@gmail.com'
+
+          smtp:
+            enabled: true
+            address: email-smtp.eu-west-1.amazonaws.com
+            port: 587
+            user_name: AKIA4LURNLIDRHK4VUWA
+            password:
+              secret: gitlab-smtp
+              key: password
+            authentication: login
+            starttls_auto: true
+
+        gitlab:
+          # https://docs.gitlab.com/charts/advanced/external-object-storage/aws-iam-roles.html
+          # https://docs.gitlab.com/ee/install/aws/manual_install_aws.html#create-an-iam-policy
+          webservice:
+            ingress:
+              tls:
+                secretName: gitlab-webservice-cert
+              annotations:
+                cert-manager.io/cluster-issuer: letsencrypt-prod
+            resources:
+              limits:
+                cpu: 1.5
+                memory: 6G
+              requests:
+                cpu: 300m
+                memory: 3G
+            hpa:
+              cpu:
+                targetType: Utilization
+                targetAverageUtilization: 75
+              memory:
+                targetType: Utilization
+                targetAverageUtilization: 75
+
+            serviceAccount:
+              enabled: true
+              name: gitlab-webservice
+              annotations:
+                eks.amazonaws.com/role-arn: arn:aws:iam::849634744839:role/demo-eks-cluster-gitlab-role
+          sidekiq:
+            resources:
+              limits:
+                cpu: 2
+                memory: 5Gi
+              requests:
+                cpu: 500m
+                memory: 2Gi
+            hpa:
+              cpu:
+                targetType: Utilization
+                targetAverageUtilization: 75
+              memory:
+                targetType: Utilization
+                targetAverageUtilization: 75
+
+            serviceAccount:
+              enabled: true
+              name: gitlab-sidekiq
+              annotations:
+                eks.amazonaws.com/role-arn: arn:aws:iam::849634744839:role/demo-eks-cluster-gitlab-role
+          toolbox:
+            # https://docs.gitlab.com/charts/backup-restore/#pod-eviction-issues
+            persistence:
+              enabled: true
+              size: 30Gi
+              storageClass: gp2
+            serviceAccount:
+              enabled: true
+              name: gitlab-toolbox
+              annotations:
+                eks.amazonaws.com/role-arn: arn:aws:iam::849634744839:role/demo-eks-cluster-gitlab-role
+            backups:
+              cron:
+                enabled: true
+                schedule: "0 1 * * *"
+                persistence:
+                  enabled: true
+                  useGenericEphemeralVolume: true
+                  storageClass: gp2
+                  accessMode: ReadWriteOnce
+                  size: 30Gi
+              objectStorage:
+                backend: s3
+                config:
+                  secret: s3-credentials
+                  key: config
+          
+          gitlab-shell:
+            resources:
+              limits:
+               cpu: 100m
+               memory: 128Mi
+              requests:
+                cpu: 0
+                memory: 32Mi
+            hpa:
+              cpu:
+                targetType: AverageValue  # Utilization or AverageValue
+                targetAverageValue: 100m
+                # targetAverageUtilization: 75
+              memory:
+                targetType: Utilization  # Utilization or AverageValue
+                targetAverageUtilization: 75
+
+          gitlab-pages:
+            ingress:
+              tls:
+                secretName: gitlab-pages-tls-wildcard
+            resources:
+              limits:
+                cpu: 1
+                memory: 2G
+              requests:
+                cpu: 100m
+                memory: 128Mi
+            hpa:
+              maxReplicas: 10
+              minReplicas: 1
+              cpu:
+                targetType: Utilization
+                targetAverageUtilization: 75
+              memory:
+                targetType: Utilization
+                targetAverageUtilization: 75
+
+          gitaly:
+            resources:
+              limits:
+               cpu: 1
+               memory: 2Gi
+              requests:
+                cpu: 100m
+                memory: 512Mi
+
+            persistence:
+              size: 30Gi
+              storageClass: "gp3-encrypted"
+
+          kas:
+            ingress:
+              tls:
+                secretName: gitlab-kas-cert
+              annotations:
+                cert-manager.io/cluster-issuer: letsencrypt-prod
+            resources:
+              limits:
+                cpu: 500m
+                memory: 1Gi
+              requests:
+                cpu: 50m
+                memory: 64Mi
+            hpa:
+              cpu:
+                targetType: Utilization
+                targetAverageUtilization: 75
+              memory:
+                targetType: Utilization
+                targetAverageUtilization: 75
+
+  destination:
+    namespace: gitlab
+    server: "https://kubernetes.default.svc"
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: -1
+
+  ignoreDifferences:
+    - group: autoscaling
+      kind: HorizontalPodAutoscaler
+      jsonPointers:
+        - /spec/metrics
