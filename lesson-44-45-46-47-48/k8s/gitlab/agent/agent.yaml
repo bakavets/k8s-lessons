@@ -1,0 +1,37 @@
+# https://about.gitlab.com/blog/2022/06/08/configuring-your-cluster-with-kubernetes-integration/
+# https://docs.gitlab.com/charts/charts/gitlab/kas/#:~:text=The%20kas%20sub%2Dchart%20provides,the%20GitLab%20agent%20for%20Kubernetes.
+# https://docs.gitlab.com/ee/user/clusters/agent/#workflows
+# https://docs.gitlab.com/ee/user/clusters/agent/gitops/agent.html#gitops-configuration-reference
+# https://docs.gitlab.com/ee/user/clusters/agent/install/
+# https://docs.gitlab.com/ee/user/clusters/agent/ci_cd_workflow.html
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "-8"
+  name: gitlab-agent
+  namespace: argocd
+spec:
+  project: infrastructure
+  source:
+    repoURL: "https://charts.gitlab.io/"
+    targetRevision: 1.19.0
+    chart: gitlab-agent
+    helm:
+      values: |
+        config:
+          kasAddress: 'wss://kas-gitlab.kubxr.com'
+          secretName: gitlab-agent
+
+  destination:
+    namespace: gitlab-agent
+    server: "https://kubernetes.default.svc"
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: -1
+    syncOptions:
+    - CreateNamespace=true

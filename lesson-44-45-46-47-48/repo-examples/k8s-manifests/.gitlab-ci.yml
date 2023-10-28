@@ -1,0 +1,12 @@
+# https://docs.gitlab.com/ee/user/clusters/agent/ci_cd_workflow.html#update-your-gitlab-ciyml-file-to-run-kubectl-commands
+deploy:
+  image:
+    name: bitnami/kubectl:latest
+    entrypoint: [""]
+  script:
+    - kubectl config get-contexts
+    - kubectl config use-context root/agents:k8s-agent
+    - kubectl get pods
+    - kubectl apply -f kuber.yaml
+    - kubectl auth can-i '*' '*' --all-namespaces
+    - kubectl auth can-i --list

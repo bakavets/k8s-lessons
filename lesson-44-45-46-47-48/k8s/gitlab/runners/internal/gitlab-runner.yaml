@@ -1,0 +1,115 @@
+# https://www.flypenguin.de/2022/09/09/gitlab-runners-eks-irsa-s3-cache/
+# https://gitlab.com/gitlab-org/gitlab-runner/-/issues/25972
+# https://docs.gitlab.com/runner/executors/kubernetes.html
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "-8"
+  name: gitlab-runner
+  namespace: argocd
+spec:
+  project: infrastructure
+  source:
+    repoURL: "https://charts.gitlab.io/"
+    targetRevision: 0.57.0
+    chart: gitlab-runner
+    helm:
+      values: |
+        gitlabUrl: http://gitlab-webservice-default.gitlab.svc.cluster.local:8181/
+        concurrent: 10
+        checkInterval: 3
+        logLevel: info
+
+        rbac:
+          create: true
+          clusterWideAccess: false
+          serviceAccountAnnotations:
+            eks.amazonaws.com/role-arn: arn:aws:iam::849634744839:role/demo-eks-cluster-gitlab-runners-cache
+          rules:
+            - resources: ["configmaps", "events", "pods", "pods/attach", "pods/exec", "secrets", "services"]
+              verbs: ["get", "list", "watch", "create", "patch", "update", "delete"]
+            - apiGroups: [""]
+              resources: ["pods/exec"]
+              verbs: ["create", "patch", "delete"]
+
+        metrics:
+          enabled: true
+          portName: metrics
+          port: 9252
+          serviceMonitor:
+            enabled: false
+
+        runners:
+          config: |
+            [[runners]]
+              [runners.kubernetes]
+                namespace = "{{.Release.Namespace}}"
+                image = "ubuntu:22.04"
+                service_account_overwrite_allowed = "ci-.*"
+                node_selector_overwrite_allowed = "karpenter.sh/capacity-type=.*"
+
+                # https://docs.gitlab.com/runner/executors/kubernetes.html#configuration-settings
+                
+                # build container
+                cpu_request = "100m"
+                memory_request = "100Mi"
+                cpu_limit = "1"
+                memory_limit = "1Gi"
+                
+                cpu_request_overwrite_max_allowed = "3"
+                memory_request_overwrite_max_allowed = "12Gi"
+                cpu_limit_overwrite_max_allowed =  "3600m"
+                memory_limit_overwrite_max_allowed = "14Gi"
+                
+                # service containers
+                service_cpu_request = "50m"
+                service_memory_request = "128Mi"
+                service_cpu_limit = "1"
+                service_memory_limit = "1Gi"
+
+                # helper container
+                helper_cpu_request = "50m"
+                helper_memory_request = "64Mi"
+                helper_cpu_limit = "500m"
+                helper_memory_limit = "128Mi"
+
+              [runners.kubernetes.node_selector]
+                # "node.k8s/role" = "gitlab-runner"
+                "eks.amazonaws.com/capacityType"="ON_DEMAND"
+              [runners.kubernetes.node_tolerations]
+                "node.k8s/gitlab-role=runner" = "NoSchedule"
+
+              [runners.cache]
+                Type = "s3"
+                Path = "cache"
+                Shared = true
+                [runners.cache.s3]
+                  ServerAddress = "s3.amazonaws.com"
+                  BucketName = "demo-gitlab-runners-cache-storage"
+                  BucketLocation = "eu-west-1"
+                  Insecure = false
+
+          executor: kubernetes
+          secret: gitlab-runner-secret
+
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 200m
+          requests:
+            memory: 128Mi
+            cpu: 100m
+
+  destination:
+    namespace: gitlab-space
+    server: "https://kubernetes.default.svc"
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: -1
+    syncOptions:
+    - CreateNamespace=true

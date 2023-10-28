@@ -1,0 +1,20 @@
+job1:
+  script:
+    - ls -la
+    - echo $(date) >> date.txt
+    - ls -la
+  cache: &global_cache
+    paths:
+      - date.txt
+    policy: pull-push
+
+job2:
+  needs: ["job1"]
+  script:
+    - ls -la
+    - cat date.txt
+  cache:
+    # inherit all global cache settings
+    <<: *global_cache
+    # override the policy
+    policy: pull

@@ -1,0 +1,4 @@
+# https://docs.gitlab.com/ee/user/clusters/agent/ci_cd_workflow.html#authorize-the-agent-to-access-your-projects
+ci_access:
+  projects:
+    - id: root/k8s-manifests
