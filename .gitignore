@@ -85,3 +85,5 @@ Thumbs.db
 
 # terragrunt cache directories
 **/.terragrunt-cache/*
+
+!lesson-44-45-46-47-48/repo-examples/demo/demo.mp4
