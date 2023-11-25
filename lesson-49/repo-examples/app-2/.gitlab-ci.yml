@@ -1,0 +1,42 @@
+variables:
+  VERSION:
+    value: ""
+    description: "Enter the container version. Example: v0.0.1"
+  KANIKO_DOCKERFILE: "Dockerfile"
+  KANIKO_CONTEXT: ""
+  KANIKO_IMAGE: "849634744839.dkr.ecr.eu-west-1.amazonaws.com/demo-app"
+
+stages:
+  - build
+
+kaniko:
+  stage: build
+  tags:
+    - k8s
+  variables:
+    KUBERNETES_CPU_REQUEST: "1"
+    KUBERNETES_MEMORY_REQUEST: "2Gi"
+    KUBERNETES_CPU_LIMIT: "2"
+    KUBERNETES_MEMORY_LIMIT: "4Gi"
+    KUBERNETES_SERVICE_ACCOUNT_OVERWRITE: ci-kaniko
+    KANIKO_IMAGE_DIGEST_NAME: kaniko_image_digest.txt
+  image:
+    name: gcr.io/kaniko-project/executor:v1.16.0-debug
+    entrypoint: [""]
+  before_script:
+    - |
+      if [ -z $VERSION ]; then
+        echo "[INFO] VERSION is empty. Generate version from branch name and short commit ID."
+        VERSION="$CI_COMMIT_BRANCH-$CI_COMMIT_SHORT_SHA"
+      fi
+      echo "[INFO] VERSION: $VERSION"
+  script:
+    - /kaniko/executor
+      --dockerfile="${KANIKO_DOCKERFILE}"
+      --context="${CI_PROJECT_DIR}/${KANIKO_CONTEXT}"
+      --destination="${KANIKO_IMAGE}:${VERSION}"
+      --digest-file=$KANIKO_IMAGE_DIGEST_NAME
+      ${KANIKO_EXTRA_ARGS}
+  artifacts:
+    paths:
+      - $KANIKO_IMAGE_DIGEST_NAME

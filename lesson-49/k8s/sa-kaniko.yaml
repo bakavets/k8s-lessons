@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ci-kaniko
+  namespace: gitlab-space-external
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::849634744839:role/demo-eks-cluster-kaniko
